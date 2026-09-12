@@ -12,7 +12,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // ============================================================
 // GOOGLE OAUTH
 // Фронтенд присылает credential (JWT от Google Identity Services)
-// Бэкенд верифицирует подпись через google-auth-library
+// Бэкенд проверяет подпись через google-auth-library
 // ============================================================
 router.post('/auth/google', async (req, res) => {
     try {
@@ -53,8 +53,7 @@ router.post('/auth/google', async (req, res) => {
 
 // ============================================================
 // TELEGRAM LOGIN WIDGET
-// Telegram присылает объект user с hash — проверяем HMAC-SHA256
-// через @grammyjs/validator
+// Проверяем подпись HMAC-SHA256 через @grammyjs/validator
 // ============================================================
 router.post('/auth/telegram', (req, res) => {
     try {
@@ -63,14 +62,13 @@ router.post('/auth/telegram', (req, res) => {
             return res.status(400).json({ error: 'No hash' });
         }
 
-        // Проверка подписи Telegram
         const isValid = checkSignature(process.env.TELEGRAM_BOT_TOKEN, data);
         if (!isValid) {
             console.error('[Telegram auth] Invalid signature');
             return res.status(403).json({ error: 'Invalid Telegram signature' });
         }
 
-        // Свежесть авторизации — не старше 24 часов
+        // Проверка свежести (24 часа)
         const authDate = parseInt(data.auth_date || 0) * 1000;
         if (Date.now() - authDate > 24 * 60 * 60 * 1000) {
             return res.status(403).json({ error: 'Auth expired' });
@@ -99,7 +97,6 @@ router.post('/auth/telegram', (req, res) => {
 
 // ============================================================
 // STEAM OPENID 2.0
-// Через паспортную стратегию passport-steam-modern
 // ============================================================
 if (process.env.STEAM_REALM && process.env.STEAM_RETURN_URL) {
     passport.use(new SteamStrategy({
@@ -137,13 +134,13 @@ router.get('/auth/steam',
     passport.authenticate('steam', { session: false })
 );
 
-// Steam вернёт пользователя сюда
+// Steam вернёт сюда после подтверждения
 router.get('/auth/steam/return',
     passport.authenticate('steam', { session: false, failureRedirect: '/auth/steam/fail' }),
     (req, res) => {
         const user = req.user;
         const token = signToken(user);
-        // Редирект на фронтенд с токеном в query-параметре
+        // Редирект на фронтенд с токеном
         res.redirect(`${process.env.FRONTEND_URL}/?steam_token=${token}`);
     }
 );
@@ -155,7 +152,6 @@ router.get('/auth/steam/fail', (req, res) => {
 
 // ============================================================
 // ПОЛУЧИТЬ СВОЙ ПРОФИЛЬ
-// Требует валидный JWT в заголовке Authorization
 // ============================================================
 router.get('/me', requireAuth, (req, res) => {
     const user = db.findUserById(req.user.id);
