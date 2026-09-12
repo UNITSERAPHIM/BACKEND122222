@@ -2,7 +2,7 @@ import express from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { checkSignature } from '@grammyjs/validator';
 import passport from 'passport';
-import { Strategy as SteamStrategy } from 'passport-steam-modern';
+import { SteamStrategy } from 'passport-steam-modern';
 import { signToken, requireAuth, sanitizeUser } from '../middleware/auth.js';
 import * as db from '../db.js';
 
