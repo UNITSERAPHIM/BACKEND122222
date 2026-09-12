@@ -1,0 +1,29 @@
+{
+  "name": "green-noise-backend",
+  "version": "1.0.0",
+  "description": "Backend for Green Noise bar",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.5",
+    "cookie-parser": "^1.4.7",
+    "google-auth-library": "^9.14.0",
+    "@grammyjs/validator": "^1.0.3",
+    "passport": "^0.7.0",
+    "passport-steam-modern": "^1.0.0",
+    "express-session": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
