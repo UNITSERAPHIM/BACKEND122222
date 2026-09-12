@@ -5,6 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
+import passport from 'passport';
 
 import authRoutes from './routes/auth.js';
 import sbpRoutes from './routes/sbp.js';
@@ -50,8 +51,11 @@ app.use(session({
     }
 }));
 
+// Инициализация Passport (нужно для Steam-стратегии)
+app.use(passport.initialize());
+
 // ============================================================
-// RATE LIMITING (защита от спама)
+// RATE LIMITING
 // ============================================================
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
