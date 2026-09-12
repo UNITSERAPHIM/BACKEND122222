@@ -9,10 +9,12 @@ let db = {
     sbpPending: {}
 };
 
-// Загрузка из файла при старте
 if (fs.existsSync(DB_FILE)) {
     try {
-        db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        const parsed = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        db.users = parsed.users || {};
+        db.transactions = parsed.transactions || [];
+        db.sbpPending = parsed.sbpPending || {};
         console.log(`[DB] Loaded ${Object.keys(db.users).length} users`);
     } catch (e) {
         console.error('[DB] Load error:', e.message);
@@ -27,11 +29,10 @@ function persist() {
     }
 }
 
-// ============================================================
-// ПОЛЬЗОВАТЕЛИ
-// ============================================================
 export function findUserByProvider(provider, providerId) {
-    return Object.values(db.users).find(u => u.provider === provider && u.providerId === String(providerId));
+    return Object.values(db.users).find(
+        u => u.provider === provider && String(u.providerId) === String(providerId)
+    );
 }
 
 export function findUserById(id) {
@@ -49,7 +50,7 @@ export function createUser(data) {
         login: data.login || `user_${id.slice(-6)}`,
         email: data.email || null,
         provider: data.provider || 'local',
-        providerId: data.providerId || null,
+        providerId: data.providerId ? String(data.providerId) : null,
         displayName: data.displayName || null,
         avatar: data.avatar || null,
         balances: { usdt: 0, grn: 0, bonus: 0, ...(data.balances || {}) },
@@ -71,13 +72,6 @@ export function updateUser(id, patch) {
     return db.users[id];
 }
 
-export function getAllUsers() {
-    return Object.values(db.users);
-}
-
-// ============================================================
-// ТРАНЗАКЦИИ
-// ============================================================
 export function addTransaction(tx) {
     const transaction = {
         id: 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
@@ -93,9 +87,6 @@ export function getUserTransactions(userId) {
     return db.transactions.filter(t => t.userId === userId);
 }
 
-// ============================================================
-// СБП PENDING
-// ============================================================
 export function savePendingSbp(orderId, data) {
     db.sbpPending[orderId] = data;
     persist();
