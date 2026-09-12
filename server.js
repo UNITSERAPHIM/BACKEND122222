@@ -21,12 +21,14 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     'http://localhost:5500',
     'http://localhost:3000',
-    'http://127.0.0.1:5500'
+    'http://127.0.0.1:5500',
+    'http://127.0.0.1:3000'
 ].filter(Boolean);
 
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        console.warn('[CORS blocked]', origin);
         callback(new Error('CORS blocked: ' + origin));
     },
     credentials: true,
@@ -49,7 +51,7 @@ app.use(session({
 }));
 
 // ============================================================
-// RATE LIMITING
+// RATE LIMITING (защита от спама)
 // ============================================================
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -110,4 +112,8 @@ app.listen(PORT, () => {
     console.log(`   Port: ${PORT}`);
     console.log(`   ENV: ${process.env.NODE_ENV || 'development'}`);
     console.log(`   Frontend: ${process.env.FRONTEND_URL || 'not set'}`);
+    console.log(`   Google: ${process.env.GOOGLE_CLIENT_ID ? 'ON' : 'OFF'}`);
+    console.log(`   Telegram: ${process.env.TELEGRAM_BOT_TOKEN ? 'ON' : 'OFF'}`);
+    console.log(`   Steam: ${process.env.STEAM_API_KEY ? 'ON' : 'OFF'}`);
+    console.log(`   T-Bank: ${process.env.TBANK_TERMINAL_KEY ? 'ON' : 'OFF'}`);
 });
